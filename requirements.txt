@@ -1,0 +1,14 @@
+pandas
+numpy
+scikit-learn
+torch
+tsfresh
+shap
+streamlit
+plotly
+folium
+streamlit-folium
+matplotlib
+seaborn
+kaggle
+joblib
