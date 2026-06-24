@@ -30,6 +30,39 @@ SCALER_PATHS = [MODEL_DIR / "scaler.pkl", MODEL_DIR / "minmax_scaler.joblib"]
 SHAP_SUMMARY_PATH = DASHBOARD_DIR / "shap_summary.png"
 SHAP_BAR_PATH = DASHBOARD_DIR / "shap_bar.png"
 
+
+from huggingface_hub import hf_hub_download
+
+REPO_ID = "Sanjay-20/gridguard-ai"
+
+def download_assets():
+    files = [
+        "models/autoencoder.pt",
+        "models/surrogate_clf.pkl",
+        "models/minmax_scaler.joblib",
+        "data/processed/test_errors.npy",
+        "data/processed/y_test.npy",
+        "data/processed/attack_types.npy",
+        "data/processed/feature_test.csv",
+        "data/processed/shap_values.npy",
+        "dashboard/shap_summary.png",
+        "dashboard/shap_bar.png",
+    ]
+    for f in files:
+        dest = BASE_DIR / f
+        if not dest.exists():
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            hf_hub_download(
+                repo_id=REPO_ID,
+                filename=f,
+                repo_type="model",
+                local_dir=str(BASE_DIR)
+            )
+            print(f"Downloaded: {f}")
+
+download_assets()
+
+
 THRESHOLD_PERCENTILE = 25
 RANDOM_STATE = 42
 

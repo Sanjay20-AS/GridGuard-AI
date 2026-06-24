@@ -12,3 +12,4 @@ matplotlib
 seaborn
 kaggle
 joblib
+huggingface_hub
