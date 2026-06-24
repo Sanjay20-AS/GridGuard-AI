@@ -11,6 +11,7 @@ import shap
 import streamlit as st
 from PIL import Image
 from sklearn.metrics import f1_score, precision_score, recall_score
+from huggingface_hub import hf_hub_download
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 PROCESSED_DIR = BASE_DIR / "data" / "processed"
@@ -30,8 +31,8 @@ SCALER_PATHS = [MODEL_DIR / "scaler.pkl", MODEL_DIR / "minmax_scaler.joblib"]
 SHAP_SUMMARY_PATH = DASHBOARD_DIR / "shap_summary.png"
 SHAP_BAR_PATH = DASHBOARD_DIR / "shap_bar.png"
 
-
-from huggingface_hub import hf_hub_download
+THRESHOLD_PERCENTILE = 25
+RANDOM_STATE = 42
 
 REPO_ID = "Sanjay-20/gridguard-ai"
 
@@ -41,6 +42,7 @@ def download_assets():
         "models/surrogate_clf.pkl",
         "models/minmax_scaler.joblib",
         "data/processed/test_errors.npy",
+        "data/processed/train_errors.npy",
         "data/processed/y_test.npy",
         "data/processed/attack_types.npy",
         "data/processed/feature_test.csv",
