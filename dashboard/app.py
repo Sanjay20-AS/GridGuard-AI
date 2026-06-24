@@ -235,26 +235,28 @@ def load_images() -> Dict[str, Image.Image]:
 
 
 @st.cache_data(show_spinner=False)
-def load_shap_values_aligned() -> np.ndarray:
-    """Load SHAP values and recompute them if the saved array is only a sample."""
+def get_customer_shap_values(customer_index: int) -> np.ndarray:
+    """Load SHAP values for a specific customer, computing on-the-fly if needed."""
     data = load_numpy_arrays()
     shap_values = data["shap_values"]
 
     if shap_values.shape[0] == data["features"].shape[0]:
-        return shap_values
+        return shap_values[customer_index]
 
     model = load_surrogate_model()
     explainer = shap.TreeExplainer(model)
-    raw_values = explainer.shap_values(data["features"])
+    row_features = data["features"][customer_index:customer_index+1]
+    raw_values = explainer.shap_values(row_features)
     if isinstance(raw_values, list):
-        shap_values = np.asarray(raw_values[1] if len(raw_values) > 1 else raw_values[0])
+        customer_shap = np.asarray(raw_values[1] if len(raw_values) > 1 else raw_values[0])[0]
     else:
-        shap_values = np.asarray(raw_values)
-        if shap_values.ndim == 3:
-            shap_values = shap_values[:, :, 1]
-
-    np.save(SHAP_VALUES_PATH, shap_values)
-    return shap_values
+        customer_shap = np.asarray(raw_values)
+        if customer_shap.ndim == 3:
+            customer_shap = customer_shap[0, :, 1]
+        else:
+            customer_shap = customer_shap[0]
+            
+    return customer_shap
 
 
 @st.cache_data(show_spinner=False)
@@ -383,9 +385,7 @@ def build_customer_shap_chart(customer_index: int) -> go.Figure:
     """Create a bar chart of the customer's top SHAP contributions."""
     data = load_numpy_arrays()
     feature_names = load_feature_names()
-    shap_values = load_shap_values_aligned()
-
-    row = shap_values[customer_index]
+    row = get_customer_shap_values(customer_index)
     top_indices = np.argsort(np.abs(row))[::-1][:5]
     top_features = [feature_names[idx] for idx in top_indices]
     top_values = [float(row[idx]) for idx in top_indices]
